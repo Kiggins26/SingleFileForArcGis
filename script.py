@@ -10,6 +10,5 @@ def readCSV(filename):
             rows.append(row)
     return rows
 
-
-
-
+print(readCSV("data.csv"))
+`
