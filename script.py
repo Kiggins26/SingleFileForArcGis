@@ -1,6 +1,7 @@
 #this is a single script for Dr.Fatmi
 #this is to be able to run a python script in ArcGis with the given data
 import csv
+CONST_speed = 50; #50 km assumption
 def readCSV(filename):
     with open (data.csv) as f:
         reader = csv.reader(f)
