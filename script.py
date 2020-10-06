@@ -2,9 +2,6 @@
 #this is to be able to run a python script in ArcGis with the given data
 import csv
 from math import radians, cos, sin, asin, sqrt
-CONST_speed = 50; #50 km assumption
-R = []; #Road Vectors
-Z = []; #GPS point
 def readCSV(filename):
     with open ("data.csv") as f:
         reader = csv.reader(f)
@@ -18,6 +15,7 @@ def readCSV(filename):
         cleanedInfo.append([rows[i][18],rows[i][8],rows[i][7]]) #19 speed_km, latt, long 
         i = i + 1;
     return cleanedInfo;
+
 def distanceBetweenTwoPoints(pointOne,pointTwo):
     const_r = 6371 #radius in km
     lon1 = radians(pointOne[2]);
@@ -37,4 +35,28 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
 
     # calculate the result
     return(c * r)
+
+def GeoLikelihood(R,Z,sigma): #Normal dis
+    smallestDistance = []
+    for z in Z:
+        small = 99999999999999;
+        for r in R:
+            if abs(z-r) < small:
+                small = abs(z-r)
+        smallestDistance.append(abs(z-small));
+    #normResults = []
+    #for x in smallestDistance:
+    return smallestDistance;
+
+def TopLikelihood(R,Z): #Students’ t-distribution with 20 degrees of freedom
+
+
+def TemLikelihood(R,Z,speed): #Expontial dis
+
+
+
+CONST_speed = 50; #50 km assumption
+R = []; #Road Vectors
+Z = []; #GPS point
+
 
