@@ -40,16 +40,21 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
 
 def GeoLikelihood(R,Z,sigma): #Normal dis
     smallestDistance = []
-    r = R;
-    for z in Z:
-        small = 99999999999999;
-        if abs(z-r) < small:
-            small = abs(z-r)
-        smallestDistance.append(abs(z-small));
     normResults = []
-    for x in smallestDistance:
-
-    return smallestDistance;
+    holder = [];
+    for z in Z:
+        for r in R:
+            holder.append(z);
+        norm = numpy.linalg.norm(holder - r, ord=1);
+        normResults.append(norm);
+        holder.clear();
+    prob = [];
+    for i in normResults: #refers to equations 1 in Newson and Krumm
+        e = 2.71828
+        part1 = 1 / sqrt(2*3.1415926535*sigma);
+        part2 = e**(-0.5*(i / sigma)**2);
+        prob.append(part1 * part2);
+    return prob;             
 
 def TopLikelihood(R,Z): #Students’ t-distribution with 20 degrees of freedom
     for z in Z:
@@ -66,7 +71,7 @@ def combine(pg,pt,pr):
     return p;
 
 CONST_speed = 50; #50 km assumption
-R = []; #Road Vectors
+R = []; #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
 Z = []; #GPS point
 sigma_z = 4.07 # meters based on the paper data, but can be calcuted by 1.4826 median(||zt-xti|| great circle)
 
