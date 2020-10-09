@@ -73,8 +73,17 @@ def TopLikelihood(R,Z,sigma_t, populationmean): #Students’ t-distribution with
         prob.append(holder);
     return prob;
 
-def TemLikelihood(R,Z,speed): #Expontial dis
+def TemLikelihood(R,Z,speed,sigma): #Expontial dis
    secondspeed = speed / 3600;
+   prob = [];
+   for i in range(1,len(Z)):
+       x = distanceBetweenTwoPoints(Z[i],Z[i-1]);
+       y = Z[i][0] - Z[i-1][0];
+       e = 2.71828
+       part1 = 1 / sqrt(2*3.1415926535*sigma);
+       part2 = e**(-0.5*((x/y) / sigma)**2);
+       prob.append(part1 * part2);
+    return(prob);
 
 def combine(pg,pt,pr):
     p = 0;
@@ -82,6 +91,6 @@ def combine(pg,pt,pr):
 
 CONST_speed = 50; #50 km assumption
 R = []; #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
-Z = []; #GPS point
+Z = readCSV("data.csv"); #GPS point
 sigma_z = 4.07 # meters based on the paper data, but can be calcuted by 1.4826 median(||zt-xti|| great circle)
 populationmean = 2134;
