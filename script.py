@@ -58,7 +58,6 @@ def TimeDiff(date1, date2):
     td_mins = int(round(td.total_seconds() / 60))
     return td_mins;
 
-print('The difference is approx. %s minutes' % td_mins)
 def GeoLikelihood(R,Z,sigma): #Normal dis
     #uses the formula in both papers
     #returns of a lisit of probabilites based on the distance to the edge
