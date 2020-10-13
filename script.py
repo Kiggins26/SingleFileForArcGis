@@ -3,7 +3,12 @@
 import csv
 from math import radians, cos, sin, asin, sqrt
 import numpy
+from datetime import datetime
 def readCSV(filename):
+    #reads the data from a stored CSV file
+    #the data pulls the GPS trace locations, as well as the placement in time
+    #the timestamp will be used for temporal likelyhood
+    #returns a lisit of the cleaned info from the csv
     with open (filename) as f:
         reader = csv.reader(f)
         next(reader)[18];
@@ -13,11 +18,15 @@ def readCSV(filename):
     cleanedInfo = [];
     i = 0;
     for info in rows:
-        cleanedInfo.append([float((60*60*rows[i][3]+60*rows[i][4]+rows[i][5])),float(rows[i][8]),float(rows[i][7])]) #19 speed_km, latt, long 
+        print((60*60*rows[i][3]+60*rows[i][4]+rows[i][5]))
+        cleanedInfo.append([float((60*60*rows[i][3]+60*rows[i][4]+rows[i][5])),float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
 
 def distanceBetweenTwoPoints(pointOne,pointTwo):
+    #takes the latt and long of two points and uses the Haversine formula to get the distance between two points
+    #In the paper they used the great circle distance
+    #returns distance in km
     const_r = 6371 #radius in km
     lon1 = radians(pointOne[2]);
     lat1 = radians(pointOne[1]);
@@ -37,7 +46,23 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
     # calculate the result
     return(c * r)
 
+def TimeDiff(date1, date2):
+    fmt = '%Y-%m-%d %H:%M:%S'
+    tstamp1 = datetime.strptime('2016-04-06 21:26:27', fmt)
+    tstamp2 = datetime.strptime('2016-04-07 09:06:02', fmt)
+    
+    if tstamp1 > tstamp2:
+        td = tstamp1 - tstamp2
+    else:
+        td = tstamp2 - tstamp1
+    td_mins = int(round(td.total_seconds() / 60))
+    return td_mins;
+
+print('The difference is approx. %s minutes' % td_mins)
 def GeoLikelihood(R,Z,sigma): #Normal dis
+    #uses the formula in both papers
+    #returns of a lisit of probabilites based on the distance to the edge
+    # this is the most similar to our current approach
     smallestDistance = []
     normResults = []
     holder = [];
@@ -49,7 +74,7 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
         holder = [];
     prob = [];
     for i in normResults: #refers to equations 1 in Newson and Krumm
-        e = 2.71828
+        e = 2.7182our
         part1 = 1 / sqrt(2*3.1415926535*sigma);
         part2 = e**(-0.5*(i / sigma)**2);
         prob.append(part1 * part2);
@@ -66,13 +91,13 @@ def TopLikelihood(R,Z,sigma_t, populationmean):
             x = 0;
         else:
             x = max(0, totalNorm/D);
-        n = len(Z); # sample size
-        df = 20; #degrees of freedom says to use 20 in the paper
-        samplemean = 0; #sample mean
-        t = (samplemean - populationmean)/(sigma_t / sqrt(n));
-        dfdic = {0:.5, .687:.25,.860:.2, 1.064:.15, 1.325:.10, 1.725:.05, 2.086:.025, 2.528:.01, 2.845:.005} # the t table
-        holder = dfdic.get(t); 
-        prob.append(holder);
+            n = len(Z); # sample size
+            df = 20; #degrees of freedom says to use 20 in the paper
+            samplemean = 0; #sample mean
+            t = (samplemean - populationmean)/(sigma_t / sqrt(n));
+            dfdic = {0:.5, .687:.25,.860:.2, 1.064:.15, 1.325:.10, 1.725:.05, 2.086:.025, 2.528:.01, 2.845:.005} # the t table
+            holder = dfdic.get(t); 
+            prob.append(holder);
     return prob;
 
 def TemLikelihood(R,Z,speed,sigma): #Expontial dis
@@ -104,7 +129,7 @@ def combine(pg,pt,pr):
     p = holder * p;
     return p;
 CONST_speed = 50; #50 km assumption
-R = [1]; #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
+R = [40,40]; #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
 Z = readCSV("data.csv"); #GPS point
 sigma_z = 4.07 # meters based on the paper data, but can be calcuted by 1.4826 median(||zt-xti|| great circle)
 populationmean = 2134;
@@ -112,4 +137,4 @@ pg = GeoLikelihood(R,Z,sigma_z);
 pt = TopLikelihood(R,Z,sigma_z,populationmean);
 pr = TemLikelihood(R,Z,CONST_speed,sigma_z);
 holder = combine(pg,pt,pr);
-print(holder);
+#print(Z)
