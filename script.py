@@ -24,27 +24,19 @@ def readCSV(filename):
     return cleanedInfo;
 
 def distanceBetweenTwoPoints(pointOne,pointTwo):
-    #takes the latt and long of two points and uses the Haversine formula to get the distance between two points
-    #In the paper they used the great circle distance
+    #usees the great circle formula to get the distance between two points
     #returns distance in km
     const_r = 6371 #radius in km
     lon1 = radians(pointOne[2]);
     lat1 = radians(pointOne[1]);
     lon2 = radians(pointTwo[2]);
     lat2 = radians(pointTwo[1]);
-    
-    # Haversine formula
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
 
-    c = 2 * asin(sqrt(a))
 
     # Radius of earth in kilometers. Use 3956 for miles
     r = 6371
-
-    # calculate the result
-    return(c * r)
+    deltaSigma = acos( sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2) );
+    return(deltaSigma * r);
 
 def TimeDiff(date1, date2):
     fmt = '%Y-%m-%d %H:%M:%S'
@@ -62,7 +54,6 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
     #uses the formula in both papers
     #returns of a lisit of probabilites based on the distance to the edge
     # this is the most similar to our current approach
-    smallestDistance = []
     normResults = []
     holder = [];
     for z in Z:
@@ -73,7 +64,7 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
         holder = [];
     prob = [];
     for i in normResults: #refers to equations 1 in Newson and Krumm
-        e = 2.7182our
+        e = 2.7182
         part1 = 1 / sqrt(2*3.1415926535*sigma);
         part2 = e**(-0.5*(i / sigma)**2);
         prob.append(part1 * part2);
