@@ -1,7 +1,7 @@
 #this is a single script for Dr.Fatmi
 #this is to be able to run a python script in ArcGis with the given data
 import csv
-from math import radians, cos, sin, asin, sqrt
+from math import radians, cos, sin, asin, sqrt, acos
 import numpy
 from datetime import datetime
 def readCSV(filename):
@@ -18,8 +18,8 @@ def readCSV(filename):
     cleanedInfo = [];
     i = 0;
     for info in rows:
-        print((60*60*rows[i][3]+60*rows[i][4]+rows[i][5]))
-        cleanedInfo.append([float((60*60*rows[i][3]+60*rows[i][4]+rows[i][5])),float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
+        date = rows[i][2] + '-' + rows[i][3]+'-'+rows[i][4]+':'+rows[i][5]+':' +rows[i][6]
+        cleanedInfo.append([date,float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
 
@@ -87,6 +87,8 @@ def TopLikelihood(R,Z,sigma_t, populationmean):
             t = (samplemean - populationmean)/(sigma_t / sqrt(n));
             dfdic = {0:.5, .687:.25,.860:.2, 1.064:.15, 1.325:.10, 1.725:.05, 2.086:.025, 2.528:.01, 2.845:.005} # the t table
             holder = dfdic.get(t); 
+            if(holder == None):
+                holder = .5;
             prob.append(holder);
     return prob;
 
@@ -95,7 +97,7 @@ def TemLikelihood(R,Z,speed,sigma): #Expontial dis
     prob = [];
     for i in range(1,len(Z)):
         x = distanceBetweenTwoPoints(Z[i],Z[i-1]);
-        y = Z[i][0] - Z[i-1][0];
+        y = TimeDiff(Z[i][0],Z[i-1][0]);
         e = 2.71828
         part1 = 1 / sqrt(2*3.1415926535*sigma);
         part2 = e**(-0.5*((x/y) / sigma)**2);
@@ -127,4 +129,4 @@ pg = GeoLikelihood(R,Z,sigma_z);
 pt = TopLikelihood(R,Z,sigma_z,populationmean);
 pr = TemLikelihood(R,Z,CONST_speed,sigma_z);
 holder = combine(pg,pt,pr);
-#print(Z)
+print(pt)
