@@ -57,18 +57,18 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
     #returns of a lisit of probabilites based on the distance to the edge
     # this is the most similar to our current approach
     normResults = []
-    holder = [];
+    holder = [0,R[0],R[1]];
+    normInput= [];
     for z in Z:
-        for r in R:
-            holder.append(sqrt(z[1]**2 + z[2]**2));
-        norm = numpy.linalg.norm(numpy.subtract(holder,r), ord=1);
-        normResults.append(norm);
-        holder = [];
+        normInput.append(distanceBetweenTwoPoints(z,holder));
+    norm = numpy.linalg.norm(normInput, ord=1);
+    normResults = [norm]
     prob = [];
     for i in normResults: #refers to equations 1 in Newson and Krumm
         e = 2.7182
         part1 = 1 / sqrt(2*3.1415926535*sigma);
         part2 = e**(-0.5*(i / sigma)**2);
+        print((-0.5*(i / sigma)**2))
         prob.append(part1 * part2);
     return prob;             
 
@@ -137,10 +137,4 @@ pg = GeoLikelihood(R,newZ,sigma_z);
 pt = TopLikelihood(R,newZ,sigma_z,populationmean);
 pr = TemLikelihood(R,newZ,CONST_speed,sigma_z);
 holder = combine(pg,pt,pr);
-print(pg)
-print("-------------")
-print(pt)
-print("-------------")
-print(pr)
-print("-------------")
 print(holder);
