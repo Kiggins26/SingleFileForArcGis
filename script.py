@@ -4,6 +4,8 @@ import csv
 from math import radians, cos, sin, asin, sqrt, acos
 import numpy
 from datetime import datetime
+#from scipy import stats
+
 def readCSV(filename):
     #reads the data from a stored CSV file
     #the data pulls the GPS trace locations, as well as the placement in time
@@ -72,6 +74,7 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
 
 def TopLikelihood(R,Z,sigma_t, populationmean):
     prob = []
+    #use ARCGIS network dis
     for i in range(1,len(Z)):
         norm1 = numpy.linalg.norm([Z[i][1],Z[i-1][1]],ord=1);
         norm2 = numpy.linalg.norm([Z[i][2],Z[i-1][2]],ord=1);
@@ -121,12 +124,23 @@ def combine(pg,pt,pr):
     p = holder * p;
     return p;
 CONST_speed = 50; #50 km assumption
-R = [40,40]; #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
+R = [49.887337, -119.498025]; #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
 Z = readCSV("data.csv"); #GPS point
 sigma_z = 4.07 # meters based on the paper data, but can be calcuted by 1.4826 median(||zt-xti|| great circle)
 populationmean = 2134;
-pg = GeoLikelihood(R,Z,sigma_z);
-pt = TopLikelihood(R,Z,sigma_z,populationmean);
-pr = TemLikelihood(R,Z,CONST_speed,sigma_z);
+newZ = [];
+time = Z[9][0][:7]
+for i in range(len(Z)):
+    if Z[i][0][:7] == time:
+        newZ.append(Z[i])
+pg = GeoLikelihood(R,newZ,sigma_z);
+pt = TopLikelihood(R,newZ,sigma_z,populationmean);
+pr = TemLikelihood(R,newZ,CONST_speed,sigma_z);
 holder = combine(pg,pt,pr);
+print(pg)
+print("-------------")
 print(pt)
+print("-------------")
+print(pr)
+print("-------------")
+print(holder);
