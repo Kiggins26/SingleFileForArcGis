@@ -75,18 +75,20 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
 def TopLikelihood(R,Z,sigma_t, populationmean):
     prob = []
     #use ARCGIS network dis
+    holderlist = []
     for i in range(1,len(Z)):
         norm1 = numpy.linalg.norm([Z[i][1],Z[i-1][1]],ord=1);
         norm2 = numpy.linalg.norm([Z[i][2],Z[i-1][2]],ord=1);
         totalNorm = norm1 + norm2;
         D = distanceBetweenTwoPoints(Z[i],Z[i-1]);  #normally would be based on the network distance, but this is based on c.
+        holderlist.append(D);
         if D == 0:
             x = 0;
         else:
             x = max(0, totalNorm/D);
             n = len(Z); # sample size
             df = 20; #degrees of freedom says to use 20 in the paper
-            samplemean = 0; #sample mean
+            samplemean = sum(holderlist)/len(holderlist); #sample mean
             t = (samplemean - populationmean)/(sigma_t / sqrt(n));
             dfdic = {0:.5, .687:.25,.860:.2, 1.064:.15, 1.325:.10, 1.725:.05, 2.086:.025, 2.528:.01, 2.845:.005} # the t table
             holder = dfdic.get(t); 
