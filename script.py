@@ -4,6 +4,8 @@ import csv
 from math import radians, cos, sin, asin, sqrt, acos
 import numpy
 from datetime import datetime
+import os
+import arcpy
 #from scipy import stats
 
 def readCSV(filename):
@@ -24,6 +26,24 @@ def readCSV(filename):
         cleanedInfo.append([date,float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
+def readRoutes(filename):
+    with open (filename) as f:
+        reader = csv.reader(f)
+        next(reader)
+        rows = []
+        for row in reader:
+            rows.append(row)
+    routes = []
+    route = []
+    for info in rows:
+        
+        if info[0] == "R":
+            routes.append(route)
+            route = []
+        else:
+            route.append(info)
+    return routes
+
 
 def distanceBetweenTwoPoints(pointOne,pointTwo):
     #usees the great circle formula to get the distance between two points
@@ -57,19 +77,20 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
     #returns of a lisit of probabilites based on the distance to the edge
     # this is the most similar to our current approach
     normResults = []
-    holder = [0,R[0],R[1]];
+    prob = [];
+    holder = [0,R[1],R[2]];
     normInput= [];
     for z in Z:
         normInput.append(distanceBetweenTwoPoints(z,holder));
     norm = numpy.linalg.norm(normInput, ord=1);
     normResults = [norm]
-    prob = [];
     for i in normResults: #refers to equations 1 in Newson and Krumm
         e = 2.7182
         part1 = 1 / sqrt(2*3.1415926535*sigma);
         part2 = e**(-0.5*(i / sigma)**2);
         print((-0.5*(i / sigma)**2))
         prob.append(part1 * part2);
+    arcpy.AddMessage(R)
     return prob;             
 
 def TopLikelihood(R,Z,sigma_t, populationmean):
@@ -126,17 +147,40 @@ def combine(pg,pt,pr):
     p = holder * p;
     return p;
 CONST_speed = 50; #50 km assumption
-R = [49.887337, -119.498025]; #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
-Z = readCSV("data.csv"); #GPS point
+fileZ = arcpy.GetParameterAsText(0)
+fileR = arcpy.GetParameterAsText(1)
+#R = readRoutes(fileR); #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
+R = [0,49.887275, -119.496736]
+Z = readCSV(fileZ); #GPS point
 sigma_z = 4.07 # meters based on the paper data, but can be calcuted by 1.4826 median(||zt-xti|| great circle)
-populationmean = 2134;
+populationmean = float(arcpy.GetParameterAsText(2))
 newZ = [];
 time = Z[9][0][:7]
 for i in range(len(Z)):
     if Z[i][0][:7] == time:
         newZ.append(Z[i])
-pg = GeoLikelihood(R,newZ,sigma_z);
-pt = TopLikelihood(R,newZ,sigma_z,populationmean);
-pr = TemLikelihood(R,newZ,CONST_speed,sigma_z);
-holder = combine(pg,pt,pr);
-print(holder);
+probstor = [];
+test = R
+for i in range(len(R)):
+    pg = GeoLikelihood(test,newZ,sigma_z);
+    pt = TopLikelihood(test,newZ,sigma_z,populationmean);
+    pr = TemLikelihood(test,newZ,CONST_speed,sigma_z);
+    holder = combine(pg,pt,pr);
+    probstor.append(holder)
+index = 0;
+greatest = -1;
+for i in range(len(probstor)):
+    if probstor[i] > greatest:
+        greatest = probstor[i]
+        index = i
+
+arcpy.AddMessage("route is ")
+arcpy.AddMessage(probstor[index])
+shipfilename = arcpy.GetParameterAsText(3)
+baseshp = arcpy.GetParameterAsText(4)
+czk=(40, -111.0)
+cursor = arcpy.da.InsertCursor(shipfilename, ("SHAPE@XY"))
+cursor.insertRow(czk)
+del cursor
+arcpy.Copy_management(baseshp, shipfilename)
+arcpy.AddXY_management(shipfilename)
