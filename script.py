@@ -1,9 +1,15 @@
+Yohen T.
+	
+Attachments11:31 PM (2 minutes ago)
+	
+to me
 #this is a single script for Dr.Fatmi
 #this is to be able to run a python script in ArcGis with the given data
 import csv
 from math import radians, cos, sin, asin, sqrt, acos
 import numpy
 from datetime import datetime
+import csv
 import os
 import arcpy
 #from scipy import stats
@@ -26,23 +32,7 @@ def readCSV(filename):
         cleanedInfo.append([date,float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
-def readRoutes(filename):
-    with open (filename) as f:
-        reader = csv.reader(f)
-        next(reader)
-        rows = []
-        for row in reader:
-            rows.append(row)
-    routes = []
-    route = []
-    for info in rows:
-        
-        if info[0] == "R":
-            routes.append(route)
-            route = []
-        else:
-            route.append(info)
-    return routes
+
 
 
 def distanceBetweenTwoPoints(pointOne,pointTwo):
@@ -90,7 +80,6 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
         part2 = e**(-0.5*(i / sigma)**2);
         print((-0.5*(i / sigma)**2))
         prob.append(part1 * part2);
-    arcpy.AddMessage(R)
     return prob;             
 
 def TopLikelihood(R,Z,sigma_t, populationmean):
@@ -135,52 +124,70 @@ def combine(pg,pt,pr):
     holder = 1;
     for i in range(len(pg)):
         if ((pg[i] != None)):
-            holder = pg[i];
+            holder = holder * pg[i];
     for i in range(len(pt)):
         if ((pt[i] != None)):
-            holder = pt[i];
+            holder = holder * pt[i];
     for i in range(len(pr)):
         if ((pr[i] != None)):
-            holder = pr[i];
+            holder = holder * pr[i];
 
 
     p = holder * p;
     return p;
 CONST_speed = 50; #50 km assumption
 fileZ = arcpy.GetParameterAsText(0)
-fileR = arcpy.GetParameterAsText(1)
 #R = readRoutes(fileR); #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
 R = [0,49.887275, -119.496736]
 Z = readCSV(fileZ); #GPS point
 sigma_z = 4.07 # meters based on the paper data, but can be calcuted by 1.4826 median(||zt-xti|| great circle)
-populationmean = float(arcpy.GetParameterAsText(2))
+populationmean = float(arcpy.GetParameterAsText(1))
 newZ = [];
 time = Z[9][0][:7]
 for i in range(len(Z)):
     if Z[i][0][:7] == time:
         newZ.append(Z[i])
-probstor = [];
-test = R
-for i in range(len(R)):
-    pg = GeoLikelihood(test,newZ,sigma_z);
-    pt = TopLikelihood(test,newZ,sigma_z,populationmean);
-    pr = TemLikelihood(test,newZ,CONST_speed,sigma_z);
-    holder = combine(pg,pt,pr);
-    probstor.append(holder)
-index = 0;
+R1 = [["Water Street", 49.887680, -119.496595] ,["Water Street", 49.887098, -119.496528], ["Water Street", 49.886739, -119.496635], ["Bernard ave", 49.886357, -119.497029],["Bernard ave", 49.886357, -119.497029],["Bernard ave", 49.886357, -119.497029],["Abbott Street", 49.886253, -119.498992],["Abbott Street", 49.885610 -119.499453]];
+R2 = [["Queensway", 49.885610 -119.499453],["Queensway", 49.887530, -119.498312],["Queensway", 49.887381, -119.498103],["Mill Street", 49.887028, -119.497770],["Mill Stree", 49.886641, -119.497952],["Abbott Street", 49.886340, -119.498542]];
+prob = []
+pg = []
+pt = []
+pr = []
+for test in R1:
+    if len(test) == 3:
+        pg = pg + GeoLikelihood(test,newZ,sigma_z);
+        pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean);
+        pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
+holder = combine(pg,pt,pr);
+prob.append(holder)
+pg = []
+pt = []
+pr = []
+for test in R2:
+    if len(test) == 3:
+        pg = pg + GeoLikelihood(test,newZ,sigma_z);
+        pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean);
+        pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
+prob.append(holder)
 greatest = -1;
-for i in range(len(probstor)):
-    if probstor[i] > greatest:
-        greatest = probstor[i]
-        index = i
+index = 0;
+loc = -1;
+for i in prob:
+    if i > greatest:
+        greatest = i;
+        loc = index
+    index = index +1;
+
+    
 
 arcpy.AddMessage("route is ")
-arcpy.AddMessage(probstor[index])
-shipfilename = arcpy.GetParameterAsText(3)
-baseshp = arcpy.GetParameterAsText(4)
-czk=(40, -111.0)
-cursor = arcpy.da.InsertCursor(shipfilename, ("SHAPE@XY"))
-cursor.insertRow(czk)
-del cursor
-arcpy.Copy_management(baseshp, shipfilename)
-arcpy.AddXY_management(shipfilename)
+arcpy.AddMessage(R1[0][0])
+
+outputPath = arcpy.GetParameterAsText(2)
+filename = outputPath + "/matchedGPS.csv"
+# writing to csv file  
+with open(filename, 'w') as csvfile:  
+    # creating a csv writer object  
+    csvwriter = csv.writer(csvfile)  
+    # writing the data rows  
+    csvwriter.writerows(R1) 
