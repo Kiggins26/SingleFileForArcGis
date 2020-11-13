@@ -1,8 +1,4 @@
-Yohen T.
-	
-Attachments11:31 PM (2 minutes ago)
-	
-to me
+
 #this is a single script for Dr.Fatmi
 #this is to be able to run a python script in ArcGis with the given data
 import csv
@@ -10,6 +6,7 @@ from math import radians, cos, sin, asin, sqrt, acos
 import numpy
 from datetime import datetime
 import csv
+import itertools
 import os
 import arcpy
 #from scipy import stats
@@ -32,6 +29,15 @@ def readCSV(filename):
         cleanedInfo.append([date,float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
+def perGen(points,size):
+    genRoutes = [];
+    prem = list(itertools.permutations(points));
+    for elem in prem:
+        if elem[0:size] not in genRoutes:
+            genRoutes.append(elem[0:size])
+    return genRoutes
+
+
 
 
 
@@ -147,47 +153,75 @@ time = Z[9][0][:7]
 for i in range(len(Z)):
     if Z[i][0][:7] == time:
         newZ.append(Z[i])
-R1 = [["Water Street", 49.887680, -119.496595] ,["Water Street", 49.887098, -119.496528], ["Water Street", 49.886739, -119.496635], ["Bernard ave", 49.886357, -119.497029],["Bernard ave", 49.886357, -119.497029],["Bernard ave", 49.886357, -119.497029],["Abbott Street", 49.886253, -119.498992],["Abbott Street", 49.885610 -119.499453]];
-R2 = [["Queensway", 49.885610 -119.499453],["Queensway", 49.887530, -119.498312],["Queensway", 49.887381, -119.498103],["Mill Street", 49.887028, -119.497770],["Mill Stree", 49.886641, -119.497952],["Abbott Street", 49.886340, -119.498542]];
+
+StreetPoints = [
+    [49.887224, -119.496712],
+    [49.883982, -119.496412],
+    [49.883595, -119.497539],
+    [49.887979, -119.496621],
+    [49.887447, -119.496857],
+    [49.886790, -119.496610],
+    [49.886424, -119.496599],
+    [49.886286, -119.498949],
+    [49.885291, -119.499416]
+    
+]
+#routes = perGen(StreetPoints,len(newZ))
+routes =[
+    [
+        ["",49.887728, -119.496647],
+        ["",49.889725, -119.496739],
+        ["",49.891038, -119.496601],
+        ["",49.891646, -119.495871],
+        ["",49.891743, -119.494873],
+        ["",49.891743, -119.491965],
+        ["",49.891708, -119.488500],
+        ["",49.893159, -119.488446],
+        [49.893629, -119.488489]
+    ]
+    ,[
+        ["",49.887224, -119.496712],
+        ["",49.883982, -119.496412],
+        ["",49.883595, -119.497539],
+        ["",49.887979, -119.496621],
+        ["",49.887447, -119.496857],
+        ["",49.886790, -119.496610],
+        ["",49.886424, -119.496599],
+        ["",49.886286, -119.498949],
+        ["",49.885291, -119.499416]
+    ]
+]
 prob = []
 pg = []
 pt = []
 pr = []
-for test in R1:
-    if len(test) == 3:
-        pg = pg + GeoLikelihood(test,newZ,sigma_z);
-        pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean);
-        pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
-holder = combine(pg,pt,pr);
-prob.append(holder)
-pg = []
-pt = []
-pr = []
-for test in R2:
-    if len(test) == 3:
-        pg = pg + GeoLikelihood(test,newZ,sigma_z);
-        pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean);
-        pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
-prob.append(holder)
+routeprob = []
+routeholder =0;
+for i in routes:
+    for test in i:
+        if len(test) == 3:
+            pg = pg + GeoLikelihood(test,newZ,sigma_z);
+            pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean);
+            pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
+    holder = combine(pg,pt,pr);
+    prob.append(holder)
+    for t in prob:
+        routeholder = routeholder * t;
+    routeprob.append(routeholder);
+    routeholder = 0;
 greatest = -1;
 index = 0;
-loc = -1;
-for i in prob:
+location = -1;
+for i in routeprob:
     if i > greatest:
         greatest = i;
-        loc = index
+        location = index
     index = index +1;
-
+if index == len(routeprob):
+    index = index -1;
+fc = arcpy.GetParameterAsText(2)
+cursor = arcpy.da.InsertCursor(fc, ["SHAPE@XY"])
+for i in routes[index]:
     
-
-arcpy.AddMessage("route is ")
-arcpy.AddMessage(R1[0][0])
-
-outputPath = arcpy.GetParameterAsText(2)
-filename = outputPath + "/matchedGPS.csv"
-# writing to csv file  
-with open(filename, 'w') as csvfile:  
-    # creating a csv writer object  
-    csvwriter = csv.writer(csvfile)  
-    # writing the data rows  
-    csvwriter.writerows(R1) 
+    xy = (i[1], i[2])
+    cursor.insertRow([xy])
