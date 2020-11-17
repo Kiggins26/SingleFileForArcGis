@@ -32,9 +32,10 @@ def readCSV(filename):
     i = 0;
 
     #adds cleaned info
+    #year, month, day, hour, minute, second, latitude, longitude 
     for info in rows:
-        date = rows[i][2] + '-' + rows[i][3]+'-'+rows[i][4]+':'+rows[i][5]+':' +rows[i][6]
-        cleanedInfo.append([date,float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
+        date = rows[i][0] + '-' + rows[i][1]+'-'+rows[i][2]+ ' '+':'+rows[i][3]+':' +rows[i][4]
+        cleanedInfo.append([date,float(rows[i][5]),float(rows[i][6])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
 
@@ -58,8 +59,8 @@ def TimeDiff(date1, date2):
     #returns a rounded int
 
     fmt = '%Y-%m-%d %H:%M:%S'
-    tstamp1 = datetime.strptime('2016-04-06 21:26:27', fmt)
-    tstamp2 = datetime.strptime('2016-04-07 09:06:02', fmt)
+    tstamp1 = datetime.strptime(date1, fmt)
+    tstamp2 = datetime.strptime(date2', fmt)
     
     if tstamp1 > tstamp2:
         td = tstamp1 - tstamp2
@@ -202,13 +203,7 @@ for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
             route = []
 
 #Reads the route from arcgis
-Z = readCSV(fileZ); 
-newZ = [];
-time = Z[9][0][:7]
-for i in range(len(Z)):
-    if Z[i][0][:7] == time:
-        newZ.append(Z[i])
-        
+newZ = readCSV(fileZ); 
 #Probability calculations
 prob = []
 pg = []
