@@ -1,0 +1,7 @@
+Things to note:
+- You must have scipy and numpy installed, pip can be used to install these
+scipy : python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose
+numpy: pip install numpy
+- you must also have arcpy
+arcpy: this should be installed upon ths arcGIS install, but https://developers.arcgis.com/python/guide/install-and-set-up/
+

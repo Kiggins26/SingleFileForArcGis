@@ -29,17 +29,6 @@ def readCSV(filename):
         cleanedInfo.append([date,float(rows[i][8]),float(rows[i][7])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
-def perGen(points,size):
-    genRoutes = [];
-    prem = list(itertools.permutations(points));
-    for elem in prem:
-        if elem[0:size] not in genRoutes:
-            genRoutes.append(elem[0:size])
-    return genRoutes
-
-
-
-
 
 def distanceBetweenTwoPoints(pointOne,pointTwo):
     #usees the great circle formula to get the distance between two points
@@ -149,6 +138,8 @@ CONST_speed = int(holder[holder.index(":"):])
 holder = config.readline()
 df = int(holder[holder.index(":"):])
 Z = readCSV(fileZ); #GPS point
+if df == -1:
+    df = len(Z) -1
 holder = config.readline()
 sigma_z = float(holder[holder.index(":"):])
 populationmean = float(arcpy.GetParameterAsText(1))
