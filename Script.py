@@ -88,7 +88,7 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
         prob.append(part1 * part2);
     return prob;             
 
-def TopLikelihood(R,Z,sigma_t, populationmean):
+def TopLikelihood(R,Z,sigma_t, populationmean,df):
     prob = []
     #use ARCGIS network dis
     holderlist = []
@@ -103,7 +103,6 @@ def TopLikelihood(R,Z,sigma_t, populationmean):
         else:
             x = max(0, totalNorm/D);
             n = len(Z); # sample size
-            df = 20; #degrees of freedom says to use 20 in the paper
             samplemean = sum(holderlist)/len(holderlist); #sample mean
             t = (samplemean - populationmean)/(sigma_t / sqrt(n));
             dfdic = {0:.5, .687:.25,.860:.2, 1.064:.15, 1.325:.10, 1.725:.05, 2.086:.025, 2.528:.01, 2.845:.005} # the t table
@@ -141,12 +140,17 @@ def combine(pg,pt,pr):
 
     p = holder * p;
     return p;
-CONST_speed = 50; #50 km assumption
+
 fileZ = arcpy.GetParameterAsText(0)
-#R = readRoutes(fileR); #Road Vectors, made of the midpoints on the map, so the more work is needed to be optimal.
-R = [0,49.887275, -119.496736]
+configfileName =fileZ[0:fileZ.rindex("/")] + "/.config"
+config = open(configfileName,"r")
+holder = config.readline()
+CONST_speed = int(holder[holder.index(":"):])
+holder = config.readline()
+df = int(holder[holder.index(":"):])
 Z = readCSV(fileZ); #GPS point
-sigma_z = 4.07 # meters based on the paper data, but can be calcuted by 1.4826 median(||zt-xti|| great circle)
+holder = config.readline()
+sigma_z = int(holder[holder.index(":"):])
 populationmean = float(arcpy.GetParameterAsText(1))
 newZ = [];
 time = Z[9][0][:7]
@@ -166,7 +170,6 @@ StreetPoints = [
     [49.885291, -119.499416]
     
 ]
-#routes = perGen(StreetPoints,len(newZ))
 routes =[
     [
         ["",49.887728, -119.496647],
@@ -201,7 +204,7 @@ for i in routes:
     for test in i:
         if len(test) == 3:
             pg = pg + GeoLikelihood(test,newZ,sigma_z);
-            pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean);
+            pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean,cleanedInfo);
             pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
     holder = combine(pg,pt,pr);
     prob.append(holder)
