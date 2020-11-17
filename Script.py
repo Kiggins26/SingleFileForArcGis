@@ -1,3 +1,4 @@
+
 #University of British Columbia Department of Civil Engineering
 #PGMatpMatching for ARCGIS
 #---------------------------------------------------------------
@@ -166,64 +167,48 @@ def combine(pg,pt,pr):
 #Reads parameters from ARCGIS
 fileZ = arcpy.GetParameterAsText(0)
 populationmean = float(arcpy.GetParameterAsText(1))
-fc = arcpy.GetParameterAsText(2)
+infc = arcpy.GetParameterAsText(2)
+fc = arcpy.GetParameterAsText(3)
 
 #reading the parameters from the .config file
-configfileName =fileZ[0:fileZ.rindex("/")] + "/.config"
+configfileName =fileZ[0:fileZ.rindex("\\")] + "\\.config"
 config = open(configfileName,"r")
 holder = config.readline()
-CONST_speed = int(holder[holder.index(":"):])
+CONST_speed =  int(holder[holder.index(":")+1:holder.index("\n")])
 holder = config.readline()
-df = int(holder[holder.index(":"):])
+df = int(holder[holder.index(":")+1:holder.index("\n")])
 if df == -1:
     df = len(Z) -1
 holder = config.readline()
-sigma_z = float(holder[holder.index(":"):])
+sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
 
-Z = readCSV(fileZ); #GPS point
+#reads the route points for ARCGIS
+routes = []
+for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
+    # Print the current polygon or polyline's ID
+    print("Feature {}:".format(row[0]))
+    partnum = 0
+
+    # Step through each part of the feature
+    for part in row[1]:
+        route = []
+        # Step through each vertex in the feature
+        for pnt in part:
+            if pnt:
+                # Print x,y coordinates of current point
+                print("{}, {}".format(pnt.X, pnt.Y))
+                route.append(["",pnt.X,pnt.Y])
+            routes.append(route)
+            route = []
+
+#Reads the route from arcgis
+Z = readCSV(fileZ); 
 newZ = [];
 time = Z[9][0][:7]
 for i in range(len(Z)):
     if Z[i][0][:7] == time:
         newZ.append(Z[i])
-
-StreetPoints = [
-    [49.887224, -119.496712],
-    [49.883982, -119.496412],
-    [49.883595, -119.497539],
-    [49.887979, -119.496621],
-    [49.887447, -119.496857],
-    [49.886790, -119.496610],
-    [49.886424, -119.496599],
-    [49.886286, -119.498949],
-    [49.885291, -119.499416]
-    
-]
-routes =[
-    [
-        ["",49.887728, -119.496647],
-        ["",49.889725, -119.496739],
-        ["",49.891038, -119.496601],
-        ["",49.891646, -119.495871],
-        ["",49.891743, -119.494873],
-        ["",49.891743, -119.491965],
-        ["",49.891708, -119.488500],
-        ["",49.893159, -119.488446],
-        [49.893629, -119.488489]
-    ]
-    ,[
-        ["",49.887224, -119.496712],
-        ["",49.883982, -119.496412],
-        ["",49.883595, -119.497539],
-        ["",49.887979, -119.496621],
-        ["",49.887447, -119.496857],
-        ["",49.886790, -119.496610],
-        ["",49.886424, -119.496599],
-        ["",49.886286, -119.498949],
-        ["",49.885291, -119.499416]
-    ]
-]
-
+        
 #Probability calculations
 prob = []
 pg = []
@@ -235,7 +220,7 @@ for i in routes:
     for test in i:
         if len(test) == 3:
             pg = pg + GeoLikelihood(test,newZ,sigma_z);
-            pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean,cleanedInfo);
+            pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean,df);
             pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
     holder = combine(pg,pt,pr);
     prob.append(holder)
