@@ -5,3 +5,19 @@ numpy: pip install numpy
 - you must also have arcpy
 arcpy: this should be installed upon ths arcGIS install, but https://developers.arcgis.com/python/guide/install-and-set-up/
 
+Steps:
+1.In catalog bar, right click and select new toolbox
+2.Name toolbox
+3.Right click toolbox
+3.Select add script
+4.Fill in name
+5.Click next
+6.Select script in file nav
+7.Click Next
+8.Add Parameters, in this form
+ Display name      DataType
+ DataCSV           File
+ Populationmean    Double
+ FCIN              Feature Class
+ FCOUt             Feature Class
+ 9. Click Finish
