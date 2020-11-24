@@ -24,7 +24,7 @@ def readCSV(filename):
     #intial read of the csv
     with open (filename) as f:
         reader = csv.reader(f)
-        next(reader)[18];
+        next(reader)[6];
         rows = []
         for row in reader:
             rows.append(row)
@@ -34,7 +34,7 @@ def readCSV(filename):
     #adds cleaned info
     #year, month, day, hour, minute, second, latitude, longitude 
     for info in rows:
-        date = rows[i][0] + '-' + rows[i][1]+'-'+rows[i][2]+ ' '+':'+rows[i][3]+':' +rows[i][4]
+        date = rows[i][0] + '-' + rows[i][1]+'-'+rows[i][2]+ ' '+rows[i][3]+':'+rows[i][4]+':' +rows[i][5]
         cleanedInfo.append([date,float(rows[i][5]),float(rows[i][6])]) #19 timestape in seconds, latt, long 
         i = i + 1;
     return cleanedInfo;
@@ -60,7 +60,7 @@ def TimeDiff(date1, date2):
 
     fmt = '%Y-%m-%d %H:%M:%S'
     tstamp1 = datetime.strptime(date1, fmt)
-    tstamp2 = datetime.strptime(date2', fmt)
+    tstamp2 = datetime.strptime(date2, fmt)
     
     if tstamp1 > tstamp2:
         td = tstamp1 - tstamp2
@@ -235,7 +235,7 @@ for i in routeprob:
     index = index +1;
 if index == len(routeprob):
     index = index -1;
-
+index = location
 #adds the points to the selected route
 cursor = arcpy.da.InsertCursor(fc, ["SHAPE@XY"])
 for i in routes[index]:
