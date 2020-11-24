@@ -71,7 +71,7 @@ def TimeDiff(date1, date2):
 
 def GeoLikelihood(R,Z,sigma): #Normal dis
     #uses the formula in both papers
-    #returns of a lisit of probabilites based on the distance to the edge
+    #returns of a list of probabilites based on the distance to the edge
     # this is the most similar to our current approach
 
     normResults = []
