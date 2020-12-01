@@ -24,18 +24,24 @@ def readCSV(filename):
     #intial read of the csv
     with open (filename) as f:
         reader = csv.reader(f)
-        next(reader)[6];
+        next(reader)[9];
         rows = []
         for row in reader:
             rows.append(row)
     cleanedInfo = [];
     i = 0;
-
+    dicts = {};
     #adds cleaned info
-    #year, month, day, hour, minute, second, latitude, longitude 
+    #tripid,year, month, day, hour, minute, second, latitude, longitude 
     for info in rows:
-        date = rows[i][0] + '-' + rows[i][1]+'-'+rows[i][2]+ ' '+rows[i][3]+':'+rows[i][4]+':' +rows[i][5]
-        cleanedInfo.append([date,float(rows[i][5]),float(rows[i][6])]) #19 timestape in seconds, latt, long 
+        tripid = rows[i][0]
+        date = rows[i][1] + '-' + rows[i][2]+'-'+rows[i][3]+ ' '+rows[i][4]+':'+rows[i][5]+':' +rows[i][6]
+        holder = [date,float(rows[i][7]),float(rows[i][8])] #19 timestape in seconds, latt, long 
+        if tripid in dicts.keys():
+            dicts[tripid].append(holder)
+        else:
+            newlist = [holder]
+            dicts[tripid] = newlist;
         i = i + 1;
     return cleanedInfo;
 
@@ -211,34 +217,36 @@ pt = []
 pr = []
 routeprob = []
 routeholder =0;
-for i in routes:
-    for test in i:
-        if len(test) == 3:
-            pg = pg + GeoLikelihood(test,newZ,sigma_z);
-            pt = pt + TopLikelihood(test,newZ,sigma_z,populationmean,df);
-            pr = pr + TemLikelihood(test,newZ,CONST_speed,sigma_z);
-    holder = combine(pg,pt,pr);
-    prob.append(holder)
-    for t in prob:
-        routeholder = routeholder * t;
-    routeprob.append(routeholder);
-    routeholder = 0;
+for trip in newZ:
+    arcpy.AddMessage("TripID:" + trip)
+    for i in routes:
+        for test in i:
+            if len(test) == 3:
+                pg = pg + GeoLikelihood(test,newZ[trip],sigma_z);
+                pt = pt + TopLikelihood(test,newZ[trip],sigma_z,populationmean,df);
+                pr = pr + TemLikelihood(test,newZ[trip],CONST_speed,sigma_z);
+        holder = combine(pg,pt,pr);
+        prob.append(holder)
+        for t in prob:
+            routeholder = routeholder * t;
+        routeprob.append(routeholder);
+        routeholder = 0;
 
 #selects = the best route
-greatest = -1;
-index = 0;
-location = -1;
-for i in routeprob:
-    if i > greatest:
-        greatest = i;
-        location = index
-    index = index +1;
-if index == len(routeprob):
-    index = index -1;
-index = location
+    greatest = -1;
+    index = 0;
+    location = -1;
+    for i in routeprob:
+        if i > greatest:
+            greatest = i;
+            location = index
+        index = index +1;
+    if index == len(routeprob):
+        index = index -1;
+    index = location
 #adds the points to the selected route
-cursor = arcpy.da.InsertCursor(fc, ["SHAPE@XY"])
-for i in routes[index]:
-    
-    xy = (i[1], i[2])
-    cursor.insertRow([xy])
+    cursor = arcpy.da.InsertCursor(fc, ["SHAPE@XY"])
+    for i in routes[index]:
+        
+        xy = (i[1], i[2])
+        cursor.insertRow([xy])
