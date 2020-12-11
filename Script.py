@@ -1,4 +1,67 @@
 
+Skip to content
+Using Gmail with screen readers
+Meet
+Hangouts
+1 of 9,455
+rar
+Inbox
+Andrew Kiggins
+	
+	AttachmentsThu, Dec 10, 11:59 PM (2 hours ago)
+ 
+Yohen T.
+	
+12:12 AM (2 hours ago)
+	
+to me
+82664
+
+
+
+On Thu, Dec 10, 2020 at 11:59 PM Andrew Kiggins <andrewkiggins2000@gmail.com> wrote:
+
+
+Yohen T.
+	
+1:42 AM (1 hour ago)
+	
+to me
+82664 / 5
+
+Yohen Thounaojam
+Bachelor of Science - Computer Science Major
+The University of British Columbia - Class of 2022
+
+Yohen T.
+	
+2:26 AM (21 minutes ago)
+	
+to me
+1000: 2.47100019454956
+3500: 27.0149998664856
+4000: 30.6370000839233
+6000:69.3109998703003
+10000: Can
+Yohen Thounaojam
+Bachelor of Science - Computer Science Major
+The University of British Columbia - Class of 2022
+
+Yohen T.
+	
+2:26 AM (21 minutes ago)
+	
+to me
+for 3 inputs
+Yohen Thounaojam
+Bachelor of Science - Computer Science Major
+The University of British Columbia - Class of 2022
+
+Yohen T.
+	
+2:47 AM (0 minutes ago)
+	
+to me
 #University of British Columbia Department of Civil Engineering
 #PGMatpMatching for ARCGIS
 #---------------------------------------------------------------
@@ -10,6 +73,7 @@ from datetime import datetime
 import csv
 import itertools
 import os
+import time
 import arcpy
 #from scipy import stats
 
@@ -24,11 +88,11 @@ def readCSV(filename):
     #intial read of the csv
     with open (filename) as f:
         reader = csv.reader(f)
-        next(reader)[9];
+        next(reader)[8];
         rows = []
         for row in reader:
             rows.append(row)
-    cleanedInfo = [];
+    
     i = 0;
     dicts = {};
     #adds cleaned info
@@ -43,7 +107,24 @@ def readCSV(filename):
             newlist = [holder]
             dicts[tripid] = newlist;
         i = i + 1;
-    return cleanedInfo;
+    return dicts;
+
+def routeSizeByDistance(trip, routes):
+    cleanedroutes = []
+    maxDistance = 0.0
+    avgx = 0.0
+    avgy = 0.0
+    for i in trip:
+        avgx = avgx + i[1]
+        avgy = avgy + i[2]
+        for j in routes:
+            if distanceBetweenTwoPoints(i,j) > maxDistance:
+                maxDistance = distanceBetweenTwoPoints(i,j)
+    avgpoint = ["",avgx/len(trip), avgy/len(trip)]
+    for i in routes:
+        if distanceBetweenTwoPoints(avgpoint,i) < maxDistance:
+            cleanedroutes.append(i)
+    return cleanedroutes
 
 def distanceBetweenTwoPoints(pointOne,pointTwo):
     #usees the great circle formula to get the distance between two points
@@ -95,8 +176,9 @@ def GeoLikelihood(R,Z,sigma): #Normal dis
         e = 2.7182
         part1 = 1 / sqrt(2*3.1415926535*sigma);
         part2 = e**(-0.5*(i / sigma)**2);
-        print((-0.5*(i / sigma)**2))
         prob.append(part1 * part2);
+    if prob == 0:
+        prob = .001
     return prob;             
 
 def TopLikelihood(R,Z,sigma_t, populationmean,df):
@@ -198,33 +280,39 @@ for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
 
     # Step through each part of the feature
     for part in row[1]:
-        route = []
+
         # Step through each vertex in the feature
         for pnt in part:
             if pnt:
                 # Print x,y coordinates of current point
                 print("{}, {}".format(pnt.X, pnt.Y))
-                route.append(["",pnt.X,pnt.Y])
-            routes.append(route)
-            route = []
+                routes.append(["",pnt.X,pnt.Y])
 
-#Reads the route from arcgis
+#Reads the points from arcgis
 newZ = readCSV(fileZ); 
+
+arcpy.AddMessage("BP1")
+
 #Probability calculations
 prob = []
 pg = []
 pt = []
 pr = []
 routeprob = []
-routeholder =0;
+routeholder =0
 for trip in newZ:
+    cleanroutes = routes[:20]
+    #cleanroutes = routeSizeByDistance(newZ[trip],routes)
+    #arcpy.AddMessage(len(cleanroutes)) #Takes a long time
+    arcpy.AddMessage("BP2")
     arcpy.AddMessage("TripID:" + trip)
-    for i in routes:
-        for test in i:
-            if len(test) == 3:
-                pg = pg + GeoLikelihood(test,newZ[trip],sigma_z);
-                pt = pt + TopLikelihood(test,newZ[trip],sigma_z,populationmean,df);
-                pr = pr + TemLikelihood(test,newZ[trip],CONST_speed,sigma_z);
+    for i in cleanroutes:  
+        if len(i) == 3:
+            pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
+            arcpy.AddMessage(pg)
+            pt = pt + TopLikelihood(i,newZ[trip],sigma_z,populationmean,df);
+            pr = pr + TemLikelihood(i,newZ[trip],CONST_speed,sigma_z);
+
         holder = combine(pg,pt,pr);
         prob.append(holder)
         for t in prob:
@@ -246,7 +334,17 @@ for trip in newZ:
     index = location
 #adds the points to the selected route
     cursor = arcpy.da.InsertCursor(fc, ["SHAPE@XY"])
-    for i in routes[index]:
-        
+    counter = 1
+    for i in routes:
         xy = (i[1], i[2])
-        cursor.insertRow([xy])
+        if counter % 5 == 0:
+            cursor.insertRow([xy])
+        counter = counter + 1
+
+#For testing purposes
+'''
+C:\Users\yoits\OneDrive\Desktop\SingleFileForArcGis-master\Fitness1.csv
+123
+C:\Users\yoits\Downloads\andrew\fcin\Network.shp
+C:\Users\yoits\Downloads\andrew\fcout\gps_points.shp
+'''
