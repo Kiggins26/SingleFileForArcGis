@@ -1,3 +1,4 @@
+
 #University of British Columbia Department of Civil Engineering
 #PGMatpMatching for ARCGIS
 #---------------------------------------------------------------
@@ -48,20 +49,18 @@ def readCSV(filename):
 def routeSizeByDistance(trip, routes):
     cleanedroutes = []
     maxDistance = 0.0
-    avgx = 0.0
-    avgy = 0.0
-    for i in trip:
-        avgx = avgx + i[1]
-        avgy = avgy + i[2]
-        for j in routes:
-            if distanceBetweenTwoPoints(i,j) > maxDistance:
-                maxDistance = distanceBetweenTwoPoints(i,j)
-    avgpoint = ["",avgx/len(trip), avgy/len(trip)]
+    holderdistance = 0;
+    for i in range(0,len(trip)):
+       for j in range(i,len(trip)):
+           if distanceBetweenTwoPoints(trip[i],trip[j]) > maxDistance:
+               maxDistance = distanceBetweenTwoPoints(trip[i],trip[j])
+    arcpy.AddMessage(maxDistance)
     for i in routes:
-        if distanceBetweenTwoPoints(avgpoint,i) < maxDistance:
-            cleanedroutes.append(i)
-    return cleanedroutes
+        if distanceBetweenTwoPoints(trip[0],i) < maxDistance or distanceBetweenTwoPoints(trip[len(trip)-1],i) < maxDistance:
+            cleanedroutes.append(i)        
 
+    return cleanedroutes
+'''
 def distanceBetweenTwoPoints(pointOne,pointTwo):
     #usees the great circle formula to get the distance between two points
     #returns distance in km
@@ -76,6 +75,14 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
     r = 6371
     deltaSigma = acos( sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2) );
     return(deltaSigma * r);
+'''
+def distanceBetweenTwoPoints(pointOne,pointTwo):
+    lon1 = pointOne[2];
+    lat1 = pointOne[1];
+    lon2 = pointTwo[2];
+    lat2 = pointTwo[1];
+
+    return sqrt(((lon1 - lon2)**2) + ((lat1 - lat2)**2));
 
 def TimeDiff(date1, date2):
     #this method takes two times in order to get the time difference for the Temporal Likelihood
@@ -226,9 +233,7 @@ for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
 
 #Reads the points from arcgis
 newZ = readCSV(fileZ); 
-
 arcpy.AddMessage("BP1")
-
 #Probability calculations
 prob = []
 pg = []
@@ -237,11 +242,12 @@ pr = []
 routeprob = []
 routeholder =0
 for trip in newZ:
-    cleanroutes = routes[:20]
-    #cleanroutes = routeSizeByDistance(newZ[trip],routes)
+    cleanroutes = routeSizeByDistance(newZ[trip],routes)
     #arcpy.AddMessage(len(cleanroutes)) #Takes a long time
     arcpy.AddMessage("BP2")
     arcpy.AddMessage("TripID:" + trip)
+    arcpy.AddMessage("Cleaned:" + str(len(cleanroutes)))
+    arcpy.AddMessage("Original:"+ str(len(routes)))
     for i in cleanroutes:  
         if len(i) == 3:
             pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
@@ -276,11 +282,3 @@ for trip in newZ:
         if counter % 5 == 0:
             cursor.insertRow([xy])
         counter = counter + 1
-
-#For testing purposes
-'''
-C:\Users\yoits\OneDrive\Desktop\SingleFileForArcGis-master\Fitness1.csv
-123
-C:\Users\yoits\Downloads\andrew\fcin\Network.shp
-C:\Users\yoits\Downloads\andrew\fcout\gps_points.shp
-'''
