@@ -58,7 +58,11 @@ def routeSizeByDistance(trip, routes):
     for i in routes:
         if distanceBetweenTwoPoints(trip[0],i) < maxDistance or distanceBetweenTwoPoints(trip[len(trip)-1],i) < maxDistance:
             cleanedroutes.append(i)        
-
+    if len(cleanroutes) < len(trip):
+        maxDistance = maxDistance + 100
+        for i in routes:
+            if distanceBetweenTwoPoints(trip[0],i) < maxDistance or distanceBetweenTwoPoints(trip[len(trip)-1],i) < maxDistance:
+                cleanedroutes.append(i) 
     return cleanedroutes
 '''
 def distanceBetweenTwoPoints(pointOne,pointTwo):
