@@ -1,4 +1,3 @@
-
 #University of British Columbia Department of Civil Engineering
 #PGMatpMatching for ARCGIS
 #---------------------------------------------------------------
@@ -11,6 +10,7 @@ import csv
 import itertools
 import os
 import time
+import random
 import arcpy
 #from scipy import stats
 
@@ -45,8 +45,15 @@ def readCSV(filename):
             dicts[tripid] = newlist;
         i = i + 1;
     return dicts;
-
 def routeSizeByDistance(trip, routes):
+    limit = 6000
+    newroutes = []
+    for i in range(limit):
+        index = random.randint(0,len(routes)-1)
+        newroutes.append(routes[index])
+    return newroutes
+    
+'''def routeSizeByDistance(trip, routes):
     cleanedroutes = []
     maxDistance = 0.0
     holderdistance = 0;
@@ -54,16 +61,15 @@ def routeSizeByDistance(trip, routes):
        for j in range(i,len(trip)):
            if distanceBetweenTwoPoints(trip[i],trip[j]) > maxDistance:
                maxDistance = distanceBetweenTwoPoints(trip[i],trip[j])
-    arcpy.AddMessage(maxDistance)
     for i in routes:
         if distanceBetweenTwoPoints(trip[0],i) < maxDistance or distanceBetweenTwoPoints(trip[len(trip)-1],i) < maxDistance:
             cleanedroutes.append(i)        
-    if len(cleanroutes) < len(trip):
-        maxDistance = maxDistance + 100
+    while len(cleanedroutes) < 2*len(trip):
+        maxDistance = maxDistance + 200000
         for i in routes:
             if distanceBetweenTwoPoints(trip[0],i) < maxDistance or distanceBetweenTwoPoints(trip[len(trip)-1],i) < maxDistance:
                 cleanedroutes.append(i) 
-    return cleanedroutes
+    return cleanedroutes'''
 '''
 def distanceBetweenTwoPoints(pointOne,pointTwo):
     #usees the great circle formula to get the distance between two points
@@ -73,8 +79,6 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
     lat1 = radians(pointOne[1]);
     lon2 = radians(pointTwo[2]);
     lat2 = radians(pointTwo[1]);
-
-
     # Radius of earth in kilometers. Use 3956 for miles
     r = 6371
     deltaSigma = acos( sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2) );
@@ -201,6 +205,7 @@ def combine(pg,pt,pr):
 
 
 #Reads parameters from ARCGIS
+arcpy.AddMessage("BP1")
 fileZ = arcpy.GetParameterAsText(0)
 populationmean = float(arcpy.GetParameterAsText(1))
 infc = arcpy.GetParameterAsText(2)
@@ -220,6 +225,7 @@ sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
 
 #reads the route points for ARCGIS
 routes = []
+
 for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
     # Print the current polygon or polyline's ID
     print("Feature {}:".format(row[0]))
@@ -237,7 +243,6 @@ for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
 
 #Reads the points from arcgis
 newZ = readCSV(fileZ); 
-arcpy.AddMessage("BP1")
 #Probability calculations
 prob = []
 pg = []
@@ -246,26 +251,21 @@ pr = []
 routeprob = []
 routeholder =0
 for trip in newZ:
+    arcpy.AddMessage("BP2")
     cleanroutes = routeSizeByDistance(newZ[trip],routes)
     #arcpy.AddMessage(len(cleanroutes)) #Takes a long time
-    arcpy.AddMessage("BP2")
     arcpy.AddMessage("TripID:" + trip)
     arcpy.AddMessage("Cleaned:" + str(len(cleanroutes)))
     arcpy.AddMessage("Original:"+ str(len(routes)))
     for i in cleanroutes:  
         if len(i) == 3:
             pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
-            arcpy.AddMessage(pg)
             pt = pt + TopLikelihood(i,newZ[trip],sigma_z,populationmean,df);
             pr = pr + TemLikelihood(i,newZ[trip],CONST_speed,sigma_z);
 
         holder = combine(pg,pt,pr);
         prob.append(holder)
-        for t in prob:
-            routeholder = routeholder * t;
-        routeprob.append(routeholder);
-        routeholder = 0;
-
+    arcpy.AddMessage("BP3")
 #selects = the best route
     greatest = -1;
     index = 0;
@@ -278,11 +278,18 @@ for trip in newZ:
     if index == len(routeprob):
         index = index -1;
     index = location
+    arcpy.AddMessage("BP4")
 #adds the points to the selected route
     cursor = arcpy.da.InsertCursor(fc, ["SHAPE@XY"])
     counter = 1
-    for i in routes:
+    for x in newZ[trip]:
+        i = routes[index]
         xy = (i[1], i[2])
-        if counter % 5 == 0:
-            cursor.insertRow([xy])
-        counter = counter + 1
+        cursor.insertRow([xy])
+        if index + 1 == len(routeprob):
+            index = index - 1
+        elif index - 1 ==0 :
+            index = index + 1
+        else:
+            index = index + 1
+    arcpy.AddMessage("BP5")
