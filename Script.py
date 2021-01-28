@@ -73,27 +73,35 @@ def routeSizeByDistance(trip, routes):
             newroutes.append(routes[index])
         return newroutes
     return cleanedroutes
-'''
-def distanceBetweenTwoPoints(pointOne,pointTwo):
-    #usees the great circle formula to get the distance between two points
-    #returns distance in km
-    const_r = 6371 #radius in km
-    lon1 = radians(pointOne[2]);
-    lat1 = radians(pointOne[1]);
-    lon2 = radians(pointTwo[2]);
-    lat2 = radians(pointTwo[1]);
-    # Radius of earth in kilometers. Use 3956 for miles
-    r = 6371
-    deltaSigma = acos( sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2) );
-    return(deltaSigma * r);
-'''
-def distanceBetweenTwoPoints(pointOne,pointTwo):
-    lon1 = pointOne[2];
-    lat1 = pointOne[1];
-    lon2 = pointTwo[2];
-    lat2 = pointTwo[1];
 
-    return sqrt(((lon1 - lon2)**2) + ((lat1 - lat2)**2));
+def distanceBetweenTwoPoints(pointOne,pointTwo):
+    if disType == 1:
+        lon1 = pointOne[2];
+        lat1 = pointOne[1];
+        lon2 = pointTwo[2];
+        lat2 = pointTwo[1];
+
+        return sqrt(((lon1 - lon2)**2) + ((lat1 - lat2)**2))
+    if disType == 2:
+        const_r = 6371 #radius in km
+        lon1 = radians(pointOne[2]);
+        lat1 = radians(pointOne[1]);
+        lon2 = radians(pointTwo[2]);
+        lat2 = radians(pointTwo[1]);
+        # Radius of earth in kilometers. Use 3956 for miles
+        r = 6371
+        deltaSigma = acos( sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2) );
+        return(deltaSigma * r);
+    else:
+        lon1 = pointOne[2];
+        lat1 = pointOne[1];
+        lon2 = pointTwo[2];
+        lat2 = pointTwo[1];
+
+        return sqrt(((lon1 - lon2)**2) + ((lat1 - lat2)**2))
+
+
+
 
 def TimeDiff(date1, date2):
     #this method takes two times in order to get the time difference for the Temporal Likelihood
@@ -226,6 +234,8 @@ if df == -1:
     df = len(Z) -1
 holder = config.readline()
 sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
+holder = config.readline()
+global disType = holder[holder.index(":")+1:holder.index("\n")]
 
 #reads the route points for ARCGIS
 routes = []
