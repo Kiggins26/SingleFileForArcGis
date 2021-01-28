@@ -21,12 +21,11 @@ def readCSV(filename):
     #the data pulls the GPS trace locations, as well as the placement in time
     #the timestamp will be used for temporal likelyhood
     #returns a list of the cleaned info from the csv
-    
+    rows = []
     #intial read of the csv
     with open (filename) as f:
         reader = csv.reader(f)
         next(reader)[8];
-        rows = []
         for row in reader:
             rows.append(row)
     
@@ -34,7 +33,8 @@ def readCSV(filename):
     dicts = {};
     #adds cleaned info
     #tripid,year, month, day, hour, minute, second, latitude, longitude 
-    for info in rows:
+    for i in range(len(rows)):
+        
         tripid = rows[i][0]
         date = rows[i][1] + '-' + rows[i][2]+'-'+rows[i][3]+ ' '+rows[i][4]+':'+rows[i][5]+':' +rows[i][6]
         holder = [date,float(rows[i][7]),float(rows[i][8])] #19 timestape in seconds, latt, long 
@@ -43,17 +43,11 @@ def readCSV(filename):
         else:
             newlist = [holder]
             dicts[tripid] = newlist;
-        i = i + 1;
+        
     return dicts;
-def routeSizeByDistance(trip, routes):
-    limit = 6000
-    newroutes = []
-    for i in range(limit):
-        index = random.randint(0,len(routes)-1)
-        newroutes.append(routes[index])
-    return newroutes
     
-'''def routeSizeByDistance(trip, routes):
+    
+def routeSizeByDistance(trip, routes):
     cleanedroutes = []
     maxDistance = 0.0
     holderdistance = 0;
@@ -64,12 +58,21 @@ def routeSizeByDistance(trip, routes):
     for i in routes:
         if distanceBetweenTwoPoints(trip[0],i) < maxDistance or distanceBetweenTwoPoints(trip[len(trip)-1],i) < maxDistance:
             cleanedroutes.append(i)        
-    while len(cleanedroutes) < 2*len(trip):
-        maxDistance = maxDistance + 200000
+    count = 0
+    while count < 5 and len(cleanedroutes) < len(trip):
+        maxDistance = maxDistance + 100
         for i in routes:
             if distanceBetweenTwoPoints(trip[0],i) < maxDistance or distanceBetweenTwoPoints(trip[len(trip)-1],i) < maxDistance:
                 cleanedroutes.append(i) 
-    return cleanedroutes'''
+        count = count + 1
+    if(len(trip) > len(cleanedroutes)):
+        limit = round(len(routes) * .10)
+        newroutes = []
+        for i in range(limit):
+            index = random.randint(0,len(routes)-1)
+            newroutes.append(routes[index])
+        return newroutes
+    return cleanedroutes
 '''
 def distanceBetweenTwoPoints(pointOne,pointTwo):
     #usees the great circle formula to get the distance between two points
@@ -173,6 +176,8 @@ def TemLikelihood(R,Z,speed,sigma):
         x = distanceBetweenTwoPoints(Z[i],Z[i-1]);
         y = TimeDiff(Z[i][0],Z[i-1][0]);
         e = 2.71828
+        if(y == 0):
+            y = .00001
         part1 = 1 / sqrt(2*3.1415926535*sigma);
         part2 = e**(-0.5*((x/y) / sigma)**2);
         prob.append(part1 * part2);
@@ -205,7 +210,6 @@ def combine(pg,pt,pr):
 
 
 #Reads parameters from ARCGIS
-arcpy.AddMessage("BP1")
 fileZ = arcpy.GetParameterAsText(0)
 populationmean = float(arcpy.GetParameterAsText(1))
 infc = arcpy.GetParameterAsText(2)
@@ -242,7 +246,7 @@ for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
                 routes.append(["",pnt.X,pnt.Y])
 
 #Reads the points from arcgis
-newZ = readCSV(fileZ); 
+newZ = readCSV(fileZ);
 #Probability calculations
 prob = []
 pg = []
@@ -264,8 +268,9 @@ for trip in newZ:
             pr = pr + TemLikelihood(i,newZ[trip],CONST_speed,sigma_z);
 
         holder = combine(pg,pt,pr);
-        prob.append(holder)
-    arcpy.AddMessage("BP3")
+        routeprob.append(holder)
+    
+
 #selects = the best route
     greatest = -1;
     index = 0;
@@ -292,4 +297,4 @@ for trip in newZ:
             index = index + 1
         else:
             index = index + 1
-    arcpy.AddMessage("BP5")
+   
