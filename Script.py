@@ -235,7 +235,7 @@ if df == -1:
 holder = config.readline()
 sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
 holder = config.readline()
-global disType = int(holder[holder.index(":")+1:holder.index("\n")])
+disType = int(holder[holder.index(":")+1:holder.index("\n")])
 
 #reads the route points for ARCGIS
 routes = []
