@@ -1,3 +1,4 @@
+
 #University of British Columbia Department of Civil Engineering
 #PGMatpMatching for ARCGIS
 #---------------------------------------------------------------
@@ -295,16 +296,17 @@ for trip in newZ:
     index = location
     arcpy.AddMessage("BP4")
 #adds the points to the selected route
-    cursor = arcpy.da.InsertCursor(fc, ["SHAPE@XY"])
     counter = 1
+    coords = []
     for x in newZ[trip]:
         i = routes[index]
         xy = (i[1], i[2])
-        cursor.insertRow([xy])
+        coords.append(xy)
         if index + 1 == len(routeprob):
             index = index - 1
         elif index - 1 ==0 :
             index = index + 1
         else:
             index = index + 1
-   
+    with arcpy.da.InsertCursor(fc, ['SHAPE@']) as cursor:
+        cursor.insertRow([coords])
