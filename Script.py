@@ -1,4 +1,3 @@
-
 #University of British Columbia Department of Civil Engineering
 #PGMatpMatching for ARCGIS
 #---------------------------------------------------------------
@@ -87,7 +86,7 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
         const_r = 6371 #radius in km
         lon1 = radians(pointOne[2]);
         lat1 = radians(pointOne[1]);
-        lon2 = radians(pointTwo[2]);
+        lon2 = radians((pointTwo[2]));
         lat2 = radians(pointTwo[1]);
         # Radius of earth in kilometers. Use 3956 for miles
         r = 6371
@@ -102,22 +101,21 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
         return sqrt(((lon1 - lon2)**2) + ((lat1 - lat2)**2))
 
 def BestThreeOptions(startingPoint,tcleanroutes):
-   option1 = 0
-   option2 = 0
-   option3 = 0
-   count = 0
-   for i in tcleanroutes:
-       holder = distanceBetweenTwoPoints(startingPoint,tcleanroutes)
-       countholder = 0
-       if holder > option1:
-           countholder = option1
-           option1 = count
-           option3 = option2
-           option2 = countholder
+    option1 = 0
+    option2 = 0
+    option3 = 0
+    count = 0
+    for i in tcleanroutes:
+        holder = distanceBetweenTwoPoints(startingPoint,tcleanroutes[count])
+        countholder = 0
+        if holder > option1:
+            countholder = option1
+            option1 = count
+            option3 = option2
+            option2 = countholder
 
-           count = count + 1
+        count = count + 1
     return [option1,option2,option3]
-
 def TimeDiff(date1, date2):
     #this method takes two times in order to get the time difference for the Temporal Likelihood
     #returns a rounded int
@@ -308,7 +306,7 @@ for trip in newZ:
     if index == len(routeprob):
         index = index -1;
     index = location
-    options = BestThreeOptions(newZ[trip[0]], cleanroutes)
+    options = BestThreeOptions(newZ[trip[0]][0], cleanroutes)
     one = options[0]
     two = options[1]
     three = options[2]
