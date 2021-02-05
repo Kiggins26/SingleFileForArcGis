@@ -308,7 +308,16 @@ for trip in newZ:
     if index == len(routeprob):
         index = index -1;
     index = location
-    arcpy.AddMessage("BP4")
+    options = BestThreeOptions(newZ[trip[0]], cleanroutes)
+    one = options[0]
+    two = options[1]
+    three = options[2]
+    if one > two and one > three:
+        index = one
+    if two > one and two > three:
+        index = two
+    if three > two and three > one:
+        index = three
 #adds the points to the selected route
     counter = 1
     coords = []
