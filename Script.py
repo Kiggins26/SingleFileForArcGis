@@ -68,7 +68,7 @@ def routeSizeByDistance(trip, routes):
     if(len(trip) > len(cleanedroutes)):
         limit = round(len(routes) * .10)
         newroutes = []
-        for i in range(limit):
+        for i in range(len(trip)):
             index = random.randint(0,len(routes)-1)
             newroutes.append(routes[index])
         return newroutes
@@ -251,7 +251,7 @@ disType = int(holder[holder.index(":")+1:holder.index("\n")])
 sr = int(holder[holder.index(":")+1:holder.index("\n")])
 
 result = arcpy.management.CreateFeatureclass(
-    arcpy.env.scratchGDB, "esri_square_z", "POLYLINE", has_z="ENABLED", spatial_reference = sr)
+    arcpy.env.scratchGDB, "esri_square_z", "POLYLINE", has_z="ENABLED", spatial_reference = 4326)
 fc = result[0]
 
 
