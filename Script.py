@@ -248,11 +248,10 @@ holder = config.readline()
 sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
 holder = config.readline()
 disType = int(holder[holder.index(":")+1:holder.index("\n")])
-spatial_reference = int(holder[holder.index(":")+1:holder.index("\n")])
+sr = int(holder[holder.index(":")+1:holder.index("\n")])
 
 result = arcpy.management.CreateFeatureclass(
-    arcpy.env.scratchGDB, "esri_square_z", "POLYLINE", has_z="ENABLED",
-    spatial_reference)
+    arcpy.env.scratchGDB, "esri_square_z", "POLYLINE", has_z="ENABLED", spatial_reference = sr)
 fc = result[0]
 
 
