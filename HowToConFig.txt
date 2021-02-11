@@ -1,9 +1,11 @@
 Things to note:
 -the config file must be on the same level as your csv. If it is not there will be a file not found error.
-- keep your speed and degrees of freedom ints. if you do not want your df to be your sample size minus 1, enter -1 for df.
+- keep your speed and degrees of freedom ints. if you do want your df to be your sample size minus 1, enter -1 for df. otherwise enter your desired df
 - your sigma_z must be a float.
 -STRING INPUTS WILL NOT BE ACCEPTED BY THE SCRIPT, AND WILL RESULT IN AN ERROR.
 -ORDER MUST BE KEPT THE SAME
+-for the type parameter a 1 means distance is straight line distance, and a 2 is great circle.
+-spatial reference is set to gcs wgs 1984
 
 Changing Parameters:
 * the starting paper is the recommended values in the paper
@@ -11,3 +13,11 @@ Changing Parameters:
 2. change the desired values
 i.e speed:50 -> speed:20
 3. save the .config file
+
+Order of Parameters:
+-speed
+-df
+-sigma
+-type
+-spatial refrence:
+

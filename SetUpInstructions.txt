@@ -3,7 +3,7 @@ Things to note:
 scipy : python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose
 numpy: pip install numpy
 - you must also have arcpy
-- CSV FORMAT SHOULD BE LIKE THIS: year, month, day, hour, minute, second, latitude, longitude 
+- CSV FORMAT SHOULD BE LIKE THIS: tripid,year, month, day, hour, minute, second, latitude, longitude 
 arcpy: this should be installed upon ths arcGIS install, but https://developers.arcgis.com/python/guide/install-and-set-up/
 
 Steps:
@@ -19,6 +19,5 @@ Steps:
  Display name      DataType
  DataCSV           File
  Populationmean    Double
- FCIN              Feature Class
  FCOUt             Feature Class
  9. Click Finish
