@@ -234,7 +234,7 @@ def combine(pg,pt,pr):
 fileZ = arcpy.GetParameterAsText(0)
 populationmean = float(arcpy.GetParameterAsText(1))
 infc = arcpy.GetParameterAsText(2)
-
+fc = arcpy.GetParameterAsText(3)
 #reading the parameters from the .config file
 configfileName =fileZ[0:fileZ.rindex("\\")] + "\\.config"
 config = open(configfileName,"r")
@@ -248,11 +248,6 @@ holder = config.readline()
 sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
 holder = config.readline()
 disType = int(holder[holder.index(":")+1:holder.index("\n")])
-sr = int(holder[holder.index(":")+1:holder.index("\n")])
-
-result = arcpy.management.CreateFeatureclass(
-    arcpy.env.scratchGDB, "esri_square_z", "POLYLINE", has_z="ENABLED", spatial_reference = 4326)
-fc = result[0]
 
 
 
