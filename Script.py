@@ -320,6 +320,7 @@ for trip in newZ:
 #adds the points to the selected route
     counter = 1
     coords = []
+    '''
     for x in newZ[trip]:
         i = routes[index]
         xy = (i[2], i[1])
@@ -330,5 +331,15 @@ for trip in newZ:
             index = index + 1
         else:
             index = index + 1
+    '''
+    for b in newZ[trip]:
+        smallest = 900000000000000000
+        holder = []
+        for t in cleanroutes:
+            if smallest > distanceBetweenTwoPoints(b,t):
+                smallest = distanceBetweenTwoPoints(b,t)
+                holder = t
+        xy = (holder[2], holder[1])
+        coords.append(xy)
     with arcpy.da.InsertCursor(fc, ['SHAPE@']) as cursor:
         cursor.insertRow([coords])
