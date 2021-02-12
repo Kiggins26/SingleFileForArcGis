@@ -5,7 +5,7 @@ Things to note:
 -STRING INPUTS WILL NOT BE ACCEPTED BY THE SCRIPT, AND WILL RESULT IN AN ERROR.
 -ORDER MUST BE KEPT THE SAME
 -for the type parameter a 1 means distance is straight line distance, and a 2 is great circle.
--spatial reference is set to gcs wgs 1984
+-the csv file should not contain whitespace
 
 Changing Parameters:
 * the starting paper is the recommended values in the paper
