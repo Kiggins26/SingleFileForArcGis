@@ -322,7 +322,7 @@ for trip in newZ:
     coords = []
     for x in newZ[trip]:
         i = routes[index]
-        xy = (i[1], i[2])
+        xy = (i[2], i[1])
         coords.append(xy)
         if index + 1 == len(routeprob):
             index = index - 1
