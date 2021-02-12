@@ -307,7 +307,7 @@ for trip in newZ:
     if index == len(routeprob):
         index = index -1;
     index = location
-    options = BestThreeOptions(newZ[trip[0]][0], cleanroutes)
+    options = BestThreeOptions(newZ[trip][0], cleanroutes)
     one = options[0]
     two = options[1]
     three = options[2]
