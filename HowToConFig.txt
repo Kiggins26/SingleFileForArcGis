@@ -19,5 +19,4 @@ Order of Parameters:
 -df
 -sigma
 -type
--spatial refrence:
 
