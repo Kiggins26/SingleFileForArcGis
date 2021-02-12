@@ -267,7 +267,7 @@ for row in arcpy.da.SearchCursor(infc, ["OID@", "SHAPE@"]):
             if pnt:
                 # Print x,y coordinates of current point
                 print("{}, {}".format(pnt.X, pnt.Y))
-                routes.append(["",pnt.X,pnt.Y])
+                routes.append(["",pnt.Y,pnt.X])
 
 #Reads the points from arcgis
 newZ = readCSV(fileZ);
