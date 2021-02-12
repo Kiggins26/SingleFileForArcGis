@@ -292,6 +292,7 @@ for trip in newZ:
         index = index -1;
 
     index = location
+    coords = []
     for b in newZ[trip]:
         smallest = 900000000000000000
         holder = []
