@@ -100,22 +100,6 @@ def distanceBetweenTwoPoints(pointOne,pointTwo):
 
         return sqrt(((lon1 - lon2)**2) + ((lat1 - lat2)**2))
 
-def BestThreeOptions(startingPoint,tcleanroutes):
-    option1 = 0
-    option2 = 0
-    option3 = 0
-    count = 0
-    for i in tcleanroutes:
-        holder = distanceBetweenTwoPoints(startingPoint,tcleanroutes[count])
-        countholder = 0
-        if holder > option1:
-            countholder = option1
-            option1 = count
-            option3 = option2
-            option2 = countholder
-
-        count = count + 1
-    return [option1,option2,option3]
 def TimeDiff(date1, date2):
     #this method takes two times in order to get the time difference for the Temporal Likelihood
     #returns a rounded int
@@ -306,32 +290,8 @@ for trip in newZ:
         index = index +1;
     if index == len(routeprob):
         index = index -1;
+
     index = location
-    options = BestThreeOptions(newZ[trip][0], cleanroutes)
-    one = options[0]
-    two = options[1]
-    three = options[2]
-    if one > two and one > three:
-        index = one
-    if two > one and two > three:
-        index = two
-    if three > two and three > one:
-        index = three
-#adds the points to the selected route
-    counter = 1
-    coords = []
-    '''
-    for x in newZ[trip]:
-        i = routes[index]
-        xy = (i[2], i[1])
-        coords.append(xy)
-        if index + 1 == len(routeprob):
-            index = index - 1
-        elif index - 1 ==0 :
-            index = index + 1
-        else:
-            index = index + 1
-    '''
     for b in newZ[trip]:
         smallest = 900000000000000000
         holder = []
