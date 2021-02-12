@@ -10,10 +10,10 @@ Steps:
 1.In catalog bar, right click and select new toolbox
 2.Name toolbox
 3.Right click toolbox
-3.Select add script
+3.Select add, then select script
 4.Fill in name
 5.Click next
-6.Select script in file nav
+6.Select the python file for the script location in file nav
 7.Click Next
 8.Add Parameters, in this form
  Display name      DataType
