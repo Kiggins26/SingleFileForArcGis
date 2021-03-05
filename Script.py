@@ -233,8 +233,7 @@ sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
 holder = config.readline()
 disType = int(holder[holder.index(":")+1:holder.index("\n")])
 
-writer = open("output.csv","w")
-writer.write("TRIPID,X,Y")
+
 
 #reads the route points for ARCGIS
 routes = []
@@ -263,13 +262,20 @@ pt = []
 pr = []
 routeprob = []
 routeholder =0
+arcpy.AddMessage(str(len(newZ)))
+tracker = 1
+csvwriter = open("output.csv","w")
+csvwriter.write("TRIP,X,Y")
 for trip in newZ:
-    arcpy.AddMessage("BP2")
+    
+    arcpy.AddMessage(str(tracker))
+    tracker = tracker + 1 
     cleanroutes = routeSizeByDistance(newZ[trip],routes)
     #arcpy.AddMessage(len(cleanroutes)) #Takes a long time
     arcpy.AddMessage("TripID:" + trip)
     arcpy.AddMessage("Cleaned:" + str(len(cleanroutes)))
     arcpy.AddMessage("Original:"+ str(len(routes)))
+    arcpy.AddMessage("Cleaned:" + str(cleanroutes[0]))
     for i in cleanroutes:  
         if len(i) == 3:
             pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
@@ -294,6 +300,7 @@ for trip in newZ:
 
     index = location
     coords = []
+
     for b in newZ[trip]:
         smallest = 900000000000000000
         holder = []
@@ -302,8 +309,8 @@ for trip in newZ:
                 smallest = distanceBetweenTwoPoints(b,t)
                 holder = t
         xy = (holder[2], holder[1])
-        writer.write(str(trip) + "," + str(holder[2]) + "," + str(holder[1]))
-
         coords.append(xy)
+        csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]))
     with arcpy.da.InsertCursor(fc, ['SHAPE@']) as cursor:
         cursor.insertRow([coords])
+arcpy.AddMessage("finished")
