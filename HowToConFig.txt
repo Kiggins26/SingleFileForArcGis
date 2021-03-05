@@ -4,7 +4,8 @@ Things to note:
 - your sigma_z must be a float.
 -STRING INPUTS WILL NOT BE ACCEPTED BY THE SCRIPT, AND WILL RESULT IN AN ERROR.
 -ORDER MUST BE KEPT THE SAME
--for the type parameter a 1 means distance is straight line distance, and a 2 is great circle.
+-for the type parameter a 1 means distance is straight line distance, and a 2 is great circle. 
+- i recommend type 1 for meter units, and 2 for degree decimals.
 -the csv file should not contain whitespace
 
 Changing Parameters:
