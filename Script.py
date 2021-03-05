@@ -233,7 +233,8 @@ sigma_z = float(holder[holder.index(":")+1:holder.index("\n")])
 holder = config.readline()
 disType = int(holder[holder.index(":")+1:holder.index("\n")])
 
-
+writer = open("output.csv","w")
+writer.write("TRIPID,X,Y")
 
 #reads the route points for ARCGIS
 routes = []
@@ -301,6 +302,8 @@ for trip in newZ:
                 smallest = distanceBetweenTwoPoints(b,t)
                 holder = t
         xy = (holder[2], holder[1])
+        writer.write(str(trip) + "," + str(holder[2]) + "," + str(holder[1]))
+
         coords.append(xy)
     with arcpy.da.InsertCursor(fc, ['SHAPE@']) as cursor:
         cursor.insertRow([coords])
