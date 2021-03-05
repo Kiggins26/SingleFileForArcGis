@@ -4,6 +4,8 @@ scipy : python -m pip install --user numpy scipy matplotlib ipython jupyter pand
 numpy: pip install numpy
 - you must also have arcpy
 - CSV FORMAT SHOULD BE LIKE THIS: tripid,year, month, day, hour, minute, second, latitude, longitude 
+- make sure there are no spaces in your csv file, otherwise you will get a traceback error.
+- YOUR CSV and SHP file must be using the same units, such as meters or degree double. If you do not have them matching you will get weird matchings.
 arcpy: this should be installed upon ths arcGIS install, but https://developers.arcgis.com/python/guide/install-and-set-up/
 
 Steps:
