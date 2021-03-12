@@ -265,7 +265,7 @@ routeholder =0
 arcpy.AddMessage(str(len(newZ)))
 tracker = 1
 csvwriter = open("output.csv","w")
-csvwriter.write("TRIP,X,Y" + "\n"")
+csvwriter.write("TRIP,X,Y" + "\n")
 for trip in newZ:
     
     arcpy.AddMessage(str(tracker))
