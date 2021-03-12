@@ -276,15 +276,6 @@ for trip in newZ:
     arcpy.AddMessage("Cleaned:" + str(len(cleanroutes)))
     arcpy.AddMessage("Original:"+ str(len(routes)))
     arcpy.AddMessage("Cleaned:" + str(cleanroutes[0]))
-    for i in cleanroutes:  
-        if len(i) == 3:
-            pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
-            pt = pt + TopLikelihood(i,newZ[trip],sigma_z,populationmean,df);
-            pr = pr + TemLikelihood(i,newZ[trip],CONST_speed,sigma_z);
-
-        holder = combine(pg,pt,pr);
-        routeprob.append(holder)
-    
 
 #selects = the best route
     greatest = -1;
@@ -300,7 +291,12 @@ for trip in newZ:
 
     index = location
     coords = []
-
+    route1 = []
+    route2 = []
+    route3 = []
+    prob1 = 0.0
+    prob2 = 0.0
+    prob3 = 0.0
     for b in newZ[trip]:
         smallest = 900000000000000000
         holder = []
@@ -308,9 +304,77 @@ for trip in newZ:
             if smallest > distanceBetweenTwoPoints(b,t):
                 smallest = distanceBetweenTwoPoints(b,t)
                 holder = t
-        xy = (holder[2], holder[1])
-        coords.append(xy)
-        csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
+                cleanroutes.remove(t)
+        xy = ["",float(holder[2]), float(holder[1])]
+        route1.append(xy)
+    for b in newZ[trip]:
+        smallest = 900000000000000000
+        holder = []
+        for t in cleanroutes:
+            if smallest > distanceBetweenTwoPoints(b,t):
+                smallest = distanceBetweenTwoPoints(b,t)
+                holder = t
+                cleanroutes.remove(t)
+        xy = ["",float(holder[2]), float(holder[1])]
+        route2.append(xy)
+    for b in newZ[trip]:
+        smallest = 900000000000000000
+        holder = []
+        for t in cleanroutes:
+            if smallest > distanceBetweenTwoPoints(b,t):
+                smallest = distanceBetweenTwoPoints(b,t)
+                holder = t
+                cleanroutes.remove(t)
+        xy = ["",float(holder[2]), float(holder[1])]
+        route3.append(xy)
+
+    for i in route1:  
+        if len(i) == 3:
+            pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
+            pt = pt + TopLikelihood(i,newZ[trip],sigma_z,populationmean,df);
+            pr = pr + TemLikelihood(i,newZ[trip],CONST_speed,sigma_z);
+
+        holder = combine(pg,pt,pr);
+        prob1 = prob1 + holder 
+
+    for i in route2:  
+        if len(i) == 3:
+            pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
+            pt = pt + TopLikelihood(i,newZ[trip],sigma_z,populationmean,df);
+            pr = pr + TemLikelihood(i,newZ[trip],CONST_speed,sigma_z);
+
+        holder = combine(pg,pt,pr);
+        prob2 = prob2 + holder 
+
+    for i in route3:  
+        if len(i) == 3:
+            pg = pg + GeoLikelihood(i,newZ[trip],sigma_z);
+            pt = pt + TopLikelihood(i,newZ[trip],sigma_z,populationmean,df);
+            pr = pr + TemLikelihood(i,newZ[trip],CONST_speed,sigma_z);
+
+        holder = combine(pg,pt,pr);
+        prob3 = prob3 + holder 
+
+    if(prob1 >= prob2 and prob1 >= prob3):
+        for holder in route1:
+            xy = (holder[2],holder[1])
+            coords.append(xy)
+            csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
+            
+    if(prob2 >= prob1 and prob2 >= prob3):
+        for holder in route2:
+            xy = (holder[2],holder[1])
+            coords.append(xy)
+            csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
+    
+    if(prob3 >= prob2 and prob3 >= prob2):
+        for holder in route1:
+            xy = (holder[2],holder[1])
+            coords.append(xy)
+            csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
+
+
+
     with arcpy.da.InsertCursor(fc, ['SHAPE@']) as cursor:
         cursor.insertRow([coords])
 arcpy.AddMessage("finished")
