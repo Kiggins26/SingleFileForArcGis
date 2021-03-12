@@ -2,7 +2,7 @@ import os
 import arcpy
 
 CSV = arcpy.GetParameterAsText(0)
-tripid= float(arcpy.GetParameterAsText(1))
+tripid= arcpy.GetParameterAsText(1)
 fcout = arcpy.GetParameterAsText(2)
 
 tripPoints = []
@@ -11,9 +11,11 @@ row = reader.readline()
 while(row):
     if tripid in row:
         holder = row.split(",")
-        tripPoints.append()
-    row = reader.readline((holder[1],holder[2]))
-with arcpy.da.InsertCursor(fcout, ['SHAPE@']) as cursor:
-        cursor.insertRow([tripPoints])
-
-
+        tripPoints.append((holder[1],holder[2]))
+    row = reader.readline()
+    
+if not tripPoints:
+    arcpy.AddMessage("No trip id found")
+else:
+    with arcpy.da.InsertCursor(fcout, ['SHAPE@']) as cursor:
+            cursor.insertRow([tripPoints])
