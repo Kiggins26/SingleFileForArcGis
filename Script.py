@@ -265,7 +265,7 @@ routeholder =0
 arcpy.AddMessage(str(len(newZ)))
 tracker = 1
 csvwriter = open("output.csv","w")
-csvwriter.write("TRIP,X,Y")
+csvwriter.write("TRIP,X,Y + "\n"")
 for trip in newZ:
     
     arcpy.AddMessage(str(tracker))
@@ -310,7 +310,7 @@ for trip in newZ:
                 holder = t
         xy = (holder[2], holder[1])
         coords.append(xy)
-        csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]))
+        csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
     with arcpy.da.InsertCursor(fc, ['SHAPE@']) as cursor:
         cursor.insertRow([coords])
 arcpy.AddMessage("finished")
