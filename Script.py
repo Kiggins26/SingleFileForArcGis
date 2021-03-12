@@ -265,7 +265,7 @@ routeholder =0
 arcpy.AddMessage(str(len(newZ)))
 tracker = 1
 csvwriter = open("output.csv","w")
-csvwriter.write("TRIP,X,Y" + "\n")
+csvwriter.write("TRIP,X,Y "+ "\n")
 for trip in newZ:
     
     arcpy.AddMessage(str(tracker))
@@ -357,21 +357,21 @@ for trip in newZ:
 
     if(prob1 >= prob2 and prob1 >= prob3):
         for holder in route1:
-            xy = (holder[2],holder[1])
+            xy = (holder[1],holder[2])
             coords.append(xy)
-            csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
+            csvwriter.write(str(trip)+","+str(holder[1])+","+str(holder[2]) +"\n")
             
-    if(prob2 >= prob1 and prob2 >= prob3):
+    if(prob2 > prob1 and prob2 > prob3):
         for holder in route2:
-            xy = (holder[2],holder[1])
+            xy = (holder[1],holder[2])
             coords.append(xy)
-            csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
+            csvwriter.write(str(trip)+","+str(holder[1])+","+str(holder[2]) +"\n")
     
-    if(prob3 >= prob2 and prob3 >= prob2):
+    if(prob3 > prob2 and prob3 > prob2):
         for holder in route1:
-            xy = (holder[2],holder[1])
+            xy = (holder[1],holder[2])
             coords.append(xy)
-            csvwriter.write(str(trip)+","+str(holder[2])+","+str(holder[1]) +"\n")
+            csvwriter.write(str(trip)+","+str(holder[1])+","+str(holder[2]) +"\n")
 
 
 
