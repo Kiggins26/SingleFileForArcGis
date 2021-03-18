@@ -11,7 +11,8 @@ row = reader.readline()
 while(row):
     if tripid in row:
         holder = row.split(",")
-        tripPoints.append((holder[1],holder[2]))
+        if tripid in holder[0]:
+            tripPoints.append((holder[1],holder[2]))
     row = reader.readline()
     
 if not tripPoints:
